@@ -84,27 +84,27 @@ Therefore, **entities must be real actors who can post on social media**:
 ## Output Format
 
 ```json
-{
+{{
     "entity_types": [
-        {
+        {{
             "name": "EntityTypeName",
             "description": "Brief description",
             "attributes": [
-                {"name": "attribute_name", "type": "text", "description": "desc"}
+                {{"name": "attribute_name", "type": "text", "description": "desc"}}
             ],
             "examples": ["Example1", "Example2"]
-        }
+        }}
     ],
     "edge_types": [
-        {
+        {{
             "name": "RELATIONSHIP_TYPE",
             "description": "Brief description",
-            "source_targets": [{"source": "SourceType", "target": "TargetType"}],
+            "source_targets": [{{"source": "SourceType", "target": "TargetType"}}],
             "attributes": []
-        }
+        }}
     ],
     "analysis_summary": "Brief analysis of the text content"
-}
+}}
 ```
 
 ## Design Guidelines
@@ -153,26 +153,26 @@ ENTITY_EXTRACTION_PROMPT = """You are an entity and relationship extraction syst
 ## Output Format
 
 ```json
-{
+{{
     "entities": [
-        {
+        {{
             "name": "Entity Name",
             "type": "EntityType",
             "summary": "Brief description of this entity",
-            "attributes": {
+            "attributes": {{
                 "attribute_name": "value"
-            }
-        }
+            }}
+        }}
     ],
     "relationships": [
-        {
+        {{
             "source": "Source Entity Name",
             "target": "Target Entity Name",
             "type": "RELATIONSHIP_TYPE",
             "fact": "Natural language description of the relationship"
-        }
+        }}
     ]
-}
+}}
 ```
 
 ## Guidelines
@@ -229,8 +229,9 @@ class HindsightGraphBuilder:
 
     def _call_llm(self, prompt: str, max_tokens: int = 4000) -> str:
         """Call LLM and return response"""
+        model = os.getenv("LLM_MODEL_NAME", "gpt-4o-mini")
         response = self.llm_client.chat.completions.create(
-            model="gpt-4o-mini",  # Use fast, cheap model
+            model=model,
             messages=[{"role": "user", "content": prompt}],
             max_tokens=max_tokens,
             temperature=0.3

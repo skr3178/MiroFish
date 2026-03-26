@@ -6,6 +6,10 @@ import SimulationRunView from '../views/SimulationRunView.vue'
 import ReportView from '../views/ReportView.vue'
 import InteractionView from '../views/InteractionView.vue'
 
+// Hindsight Flow Components
+import HindsightProcess from '../views/HindsightProcess.vue'
+import HindsightSimulation from '../views/HindsightSimulation.vue'
+
 const routes = [
   {
     path: '/',
@@ -41,6 +45,18 @@ const routes = [
     name: 'Interaction',
     component: InteractionView,
     props: true
+  },
+  // Hindsight Flow Routes (no Zep, uses PostgreSQL)
+  {
+    path: '/hindsight/process/:projectId?',
+    name: 'HindsightProcess',
+    component: HindsightProcess,
+    props: true
+  },
+  {
+    path: '/hindsight/simulation',
+    name: 'HindsightSimulation',
+    component: HindsightSimulation
   }
 ]
 

@@ -186,7 +186,7 @@
 
             <!-- 启动按钮 -->
             <div class="console-section btn-section">
-              <button 
+              <button
                 class="start-engine-btn"
                 @click="startSimulation"
                 :disabled="!canSubmit || loading"
@@ -195,6 +195,15 @@
                 <span v-else>初始化中...</span>
                 <span class="btn-arrow">→</span>
               </button>
+
+              <!-- Hindsight Flow Option -->
+              <div class="flow-options">
+                <span class="flow-label">或者使用:</span>
+                <router-link to="/hindsight/process/new" class="hindsight-link">
+                  Hindsight 模式
+                  <span class="flow-hint">(无API限制，本地PostgreSQL)</span>
+                </router-link>
+              </div>
             </div>
           </div>
         </div>
@@ -858,6 +867,40 @@ const startSimulation = () => {
   cursor: not-allowed;
   transform: none;
   border: 1px solid #E5E5E5;
+}
+
+/* Flow Options */
+.flow-options {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  font-size: 13px;
+}
+
+.flow-label {
+  color: #999;
+}
+
+.hindsight-link {
+  color: #6366f1;
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+
+.hindsight-link:hover {
+  color: #4f46e5;
+}
+
+.flow-hint {
+  font-size: 11px;
+  color: #999;
+  font-weight: 400;
 }
 
 /* 引导动画：微妙的边框脉冲 */
