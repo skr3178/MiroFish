@@ -63,6 +63,13 @@
         />
       </div>
     </main>
+
+    <!-- Resume Prompt Dialog -->
+    <ResumePrompt
+      :simulationId="currentSimulationId"
+      @resume="handleResumeStart"
+      @restart="handleRestart"
+    />
   </div>
 </template>
 
@@ -71,6 +78,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import GraphPanel from '../components/GraphPanel.vue'
 import Step3Simulation from '../components/Step3Simulation.vue'
+import ResumePrompt from '../components/checkpoint/ResumePrompt.vue'
 import { getProject, getGraphData } from '../api/graph'
 import { getSimulation, getSimulationConfig, stopSimulation, closeSimulationEnv, getEnvStatus } from '../api/simulation'
 
@@ -196,6 +204,16 @@ const handleNextStep = () => {
   // Step3Simulation 组件会直接处理报告生成和路由跳转
   // 这个方法仅作为备用
   addLog('进入 Step 4: 报告生成')
+}
+
+// --- Resume/Restart Handlers ---
+const handleResumeStart = (data) => {
+  addLog(`从 Round ${data?.resume_from_round || '?'} 恢复模拟`)
+  loadSimulationData()
+}
+
+const handleRestart = () => {
+  router.push({ name: 'Simulation', params: { simulationId: currentSimulationId.value } })
 }
 
 // --- Data Logic ---

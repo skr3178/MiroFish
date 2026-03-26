@@ -67,7 +67,17 @@ def create_app(config_class=Config):
     app.register_blueprint(graph_bp, url_prefix='/api/graph')
     app.register_blueprint(simulation_bp, url_prefix='/api/simulation')
     app.register_blueprint(report_bp, url_prefix='/api/report')
-    
+
+    # 注册 Checkpoint Extension
+    try:
+        from backend_checkpoint.integration import register_checkpoint_extension
+        register_checkpoint_extension(app)
+        if should_log_startup:
+            logger.info("Checkpoint Extension 已注册")
+    except ImportError as e:
+        if should_log_startup:
+            logger.warning(f"Checkpoint Extension 未加载: {e}")
+
     # 健康检查
     @app.route('/health')
     def health():
