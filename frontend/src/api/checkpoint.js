@@ -5,7 +5,8 @@
 
 import service from './index'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001'
+// Use relative URLs to go through Vite proxy
+const API_PREFIX = '/api/checkpoint'
 
 /**
  * Check if a simulation can be resumed
@@ -13,7 +14,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5001
  * @returns {Promise<Object>} Response with can_resume flag and resume info
  */
 export const checkResumeAvailable = (simulationId) => {
-  return service.get(`${API_BASE_URL}/api/checkpoint/check/resume/${simulationId}`)
+  return service.get(`${API_PREFIX}/check/resume/${simulationId}`)
 }
 
 /**
@@ -25,7 +26,7 @@ export const checkResumeAvailable = (simulationId) => {
  */
 export const resumeSimulation = (data) => {
   const { simulation_id, checkpoint_id } = data
-  return service.post(`${API_BASE_URL}/api/checkpoint/resume`, {
+  return service.post(`${API_PREFIX}/resume`, {
     simulation_id: simulation_id,
     checkpoint_id: checkpoint_id || 'latest'
   })
@@ -37,7 +38,7 @@ export const resumeSimulation = (data) => {
  * @returns {Promise<Object>} Response with list of checkpoints
  */
 export const listCheckpoints = (simulationId) => {
-  return service.get(`${API_BASE_URL}/api/checkpoint/checkpoints/${simulationId}`)
+  return service.get(`${API_PREFIX}/checkpoints/${simulationId}`)
 }
 
 /**
@@ -46,7 +47,7 @@ export const listCheckpoints = (simulationId) => {
  * @returns {Promise<Object>} Response with simulation status
  */
 export const getSimulationStatus = (simulationId) => {
-  return service.get(`${API_BASE_URL}/api/checkpoint/status/${simulationId}`)
+  return service.get(`${API_PREFIX}/status/${simulationId}`)
 }
 
 /**
@@ -57,7 +58,7 @@ export const getSimulationStatus = (simulationId) => {
  * @returns {Promise<Object>} Response with graph_id
  */
 export const createHindsightGraph = (data) => {
-  return service.post(`${API_BASE_URL}/api/hindsight/graph`, data)
+  return service.post(`/api/hindsight/graph`, data)
 }
 
 /**
@@ -70,7 +71,7 @@ export const createHindsightGraph = (data) => {
  * @returns {Promise<Object>} Search results
  */
 export const searchHindsightGraph = (graphId, data) => {
-  return service.post(`${API_BASE_URL}/api/hindsight/graph/${graphId}/search`, data)
+  return service.post(`/api/hindsight/graph/${graphId}/search`, data)
 }
 
 // ==================== Hindsight Flow API ====================
@@ -81,7 +82,7 @@ export const searchHindsightGraph = (graphId, data) => {
  * @returns {Promise<Object>} Response with project_id and ontology
  */
 export const generateOntology = (formData) => {
-  return service.post(`${API_BASE_URL}/api/checkpoint/ontology/generate`, formData, {
+  return service.post(`${API_PREFIX}/ontology/generate`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' }
   })
 }
@@ -96,7 +97,7 @@ export const generateOntology = (formData) => {
  * @returns {Promise<Object>} Response with task_id
  */
 export const prepareWithHindsight = (data) => {
-  return service.post(`${API_BASE_URL}/api/checkpoint/prepare`, data)
+  return service.post(`${API_PREFIX}/prepare`, data)
 }
 
 /**
@@ -105,7 +106,7 @@ export const prepareWithHindsight = (data) => {
  * @returns {Promise<Object>} Task status with progress
  */
 export const getPrepareStatus = (taskId) => {
-  return service.get(`${API_BASE_URL}/api/checkpoint/prepare/status/${taskId}`)
+  return service.get(`${API_PREFIX}/prepare/status/${taskId}`)
 }
 
 /**
@@ -116,7 +117,7 @@ export const getPrepareStatus = (taskId) => {
  */
 export const getHindsightEntities = (graphId, params = {}) => {
   const query = new URLSearchParams(params).toString()
-  return service.get(`${API_BASE_URL}/api/checkpoint/entities/${graphId}?${query}`)
+  return service.get(`${API_PREFIX}/entities/${graphId}?${query}`)
 }
 
 /**
@@ -129,7 +130,7 @@ export const getHindsightEntities = (graphId, params = {}) => {
  * @returns {Promise<Object>} Response with process_pid
  */
 export const startWithHindsight = (data) => {
-  return service.post(`${API_BASE_URL}/api/checkpoint/start`, data)
+  return service.post(`${API_PREFIX}/start`, data)
 }
 
 /**
@@ -140,7 +141,7 @@ export const startWithHindsight = (data) => {
  * @returns {Promise<Object>} Response with report_id and task_id
  */
 export const generateReportWithHindsight = (data) => {
-  return service.post(`${API_BASE_URL}/api/checkpoint/generate_report`, data)
+  return service.post(`${API_PREFIX}/generate_report`, data)
 }
 
 /**
@@ -149,7 +150,7 @@ export const generateReportWithHindsight = (data) => {
  * @returns {Promise<Object>} Task status with progress
  */
 export const getReportStatus = (taskId) => {
-  return service.get(`${API_BASE_URL}/api/checkpoint/report/status/${taskId}`)
+  return service.get(`${API_PREFIX}/report/status/${taskId}`)
 }
 
 /**
@@ -157,7 +158,7 @@ export const getReportStatus = (taskId) => {
  * @returns {Promise<Object>} Health status
  */
 export const hindsightHealthCheck = () => {
-  return service.get(`${API_BASE_URL}/api/checkpoint/health`)
+  return service.get(`${API_PREFIX}/health`)
 }
 
 export default {
