@@ -23,6 +23,10 @@ def register_checkpoint_extension(app, prefix: str = "/api"):
     - {prefix}/checkpoint/checkpoints/<sim_id> - List checkpoints
     - {prefix}/hindsight/graph - Create Hindsight graph
     - {prefix}/hindsight/graph/<graph_id>/search - Search graph
+    - {prefix}/checkpoint/ontology/generate - Generate ontology (Hindsight flow)
+    - {prefix}/checkpoint/prepare - Build graph with Hindsight
+    - {prefix}/checkpoint/start - Start simulation with checkpoints
+    - {prefix}/checkpoint/generate_report - Generate report with Hindsight
 
     Args:
         app: Flask application instance
@@ -35,10 +39,12 @@ def register_checkpoint_extension(app, prefix: str = "/api"):
         register_checkpoint_extension(app)
     """
     from .api.checkpoint_routes import checkpoint_bp, hindsight_bp
+    from .api.hindsight_flow_routes import hindsight_flow_bp
 
     # Register blueprints with prefix
     app.register_blueprint(checkpoint_bp, url_prefix=f"{prefix}/checkpoint")
     app.register_blueprint(hindsight_bp, url_prefix=f"{prefix}/hindsight")
+    app.register_blueprint(hindsight_flow_bp, url_prefix=f"{prefix}/checkpoint")
 
     print(f"[Checkpoint Extension] Registered routes:")
     print(f"  - {prefix}/checkpoint/check/resume/<sim_id>")
@@ -46,6 +52,10 @@ def register_checkpoint_extension(app, prefix: str = "/api"):
     print(f"  - {prefix}/checkpoint/checkpoints/<sim_id>")
     print(f"  - {prefix}/hindsight/graph")
     print(f"  - {prefix}/hindsight/graph/<graph_id>/search")
+    print(f"  - {prefix}/checkpoint/ontology/generate")
+    print(f"  - {prefix}/checkpoint/prepare")
+    print(f"  - {prefix}/checkpoint/start")
+    print(f"  - {prefix}/checkpoint/generate_report")
 
 
 def init_hindsight_database(connection_string: Optional[str] = None):
