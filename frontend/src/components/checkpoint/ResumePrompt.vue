@@ -1,56 +1,59 @@
 <template>
-  <div class="resume-prompt" v-if="resumeInfo && resumeInfo.can_resume" class="resume-overlay">
-    <div class="prompt-header">
-      <div class="prompt-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2v4M4 3 19 12 5 21 5 3"/>
-          <polyline points="5 3 9 17 4 12"></polyline>
+  <div v-if="showPrompt" class="resume-overlay">
+    <div class="resume-prompt">
+      <div class="prompt-header">
+        <svg class="prompt-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
         </svg>
+        <h2>Resume Simulation?</h2>
+        <p class="prompt-subtitle">
+          Your previous simulation was interrupted. Would you like to continue from where you left off?
+        </p>
       </div>
-      <h2>Resume Simulation?</h2>
-      <p class="prompt-subtitle">
-        Your previous simulation was interrupted. Would you continue from where it left off.
-      </p>
-    </div>
 
-    <div class="progress-section">
-      <div class="progress-bar">
-        <div class="progress-fill" :style="{ width: resumeInfo.progress_percent + '%' }"></div>
-      <div class="progress-text">
-        Round {{ resumeInfo.resume_round }} of {{ resumeInfo.total_rounds }}
-        ({{ resumeInfo.progress_percent.toFixed(1) }}%)
-      </p>
-    </div>
+      <div class="progress-section">
+        <div class="progress-bar">
+          <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
+        </div>
+        <p class="progress-text">
+          Round {{ resumeInfo.resume_round }} of {{ resumeInfo.total_rounds }}
+          ({{ progressPercent.toFixed(1) }}%)
+        </p>
+      </div>
 
-    <div class="info-section">
-      <div class="info-item">
-        <span class="label">Checkpoint:</span>
-        <span class="value">{{ formatTimestamp(resumeInfo.timestamp) }}</span>
+      <div class="info-section">
+        <div class="info-item">
+          <span class="label">Checkpoint Time:</span>
+          <span class="value">{{ formatTimestamp(resumeInfo.timestamp) }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Twitter Actions:</span>
+          <span class="value">{{ twitterActions }}</span>
+        </div>
+        <div class="info-item">
+          <span class="label">Reddit Actions:</span>
+          <span class="value">{{ redditActions }}</span>
+        </div>
       </div>
-      <div class="info-item">
-        <span class="label">Twitter Actions:</span>
-        <span class="value">{{ resumeInfo.platforms?.twitter?.actions_count || 0 }}</span>
-      </div>
-      <div class="info-item">
-        <span class="label">Reddit Actions:</span>
-        <span class="value">{{ resumeInfo.platforms?.reddit?.actions_count || 0 }}</span>
-      </div>
-    </div>
 
-    <div class="prompt-actions">
-      <button @click="handleResume" class="btn-primary">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polygon points="5 3 19 12 5 21 5 3"></polyline>
-        </svg>
-        Resume from Round {{ resumeInfo.resume_round + 1 }}
-      </button>
-      <button @click="handleRestart" class="btn-secondary">
-        <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M23 4v6h-6M1 20v-6h6"></path>
-          <path d="M3.51 9a9 9.36L23.5 4.36A9 0 1 3.51 9.07L4.13 9.51 0 1 3.51 9.0 4.7 9 9 12 1 20.49 5.49 9 6.03 6.14 4 6.49 1 20.49 1-9.5 4 6.9 price 2  Start from scratch
- restart simulation
-        </svg>
-      </button>
+      <div class="prompt-actions">
+        <button @click="handleResume" class="btn-primary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          Resume from Round {{ resumeInfo.resume_round + 1 }}
+        </button>
+        <button @click="handleRestart" class="btn-secondary">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M23 4v6h-6"></path>
+            <path d="M1 20v-6h6"></path>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+            <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          Start New Simulation
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -64,21 +67,36 @@ const props = defineProps({
     type: String,
     required: true
   }
-}>()
+})
 
-const emit =resume', 'restart')
+const emit = defineEmits(['resume', 'restart'])
 
 const resumeInfo = ref(null)
 const loading = ref(true)
-const showResume = ref(false)
+const showPrompt = ref(false)
+
+const progressPercent = computed(() => {
+  if (!resumeInfo.value) return 0
+  return resumeInfo.value.progress_percent || 0
+})
+
+const twitterActions = computed(() => {
+  if (!resumeInfo.value || !resumeInfo.value.platforms) return 0
+  return resumeInfo.value.platforms.twitter?.actions_count || 0
+})
+
+const redditActions = computed(() => {
+  if (!resumeInfo.value || !resumeInfo.value.platforms) return 0
+  return resumeInfo.value.platforms.reddit?.actions_count || 0
+})
 
 const checkResume = async () => {
   loading.value = true
   try {
     const response = await checkResumeAvailable(props.simulationId)
-    if (response.success && response.data.can_resume) {
+    if (response.success && response.data && response.data.can_resume) {
       resumeInfo.value = response.data
-      showResume.value = true
+      showPrompt.value = true
     }
   } catch (err) {
     console.error('Failed to check resume status:', err)
@@ -94,155 +112,181 @@ const handleResume = async () => {
       simulation_id: props.simulationId,
       checkpoint_id: resumeInfo.value?.checkpoint_id
     })
-
     if (response.success) {
-      emit('resume-start')
-      // Start polling for status
+      emit('resume', response.data)
+      showPrompt.value = false
     }
   } catch (err) {
     console.error('Resume failed:', err)
+  } finally {
     loading.value = false
   }
 }
 
 const handleRestart = () => {
   emit('restart')
-  // Navigate to simulation view (clear state)
+  showPrompt.value = false
 }
 
 const formatTimestamp = (timestamp) => {
   if (!timestamp) return 'Unknown'
   try {
     const date = new Date(timestamp)
-    return date.toLocaleDateString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit'
-      const seconds = date.getMinutes() / 60)
-      return date.toLocaleDateString('en-US', {
-        hour: date.getHours()
-        const minutes = date.getMinutes()
-        return `${hour}:${minutes}:${String(date.getMinutes(2)).padStart(2, '0')} minutes}`
-      }
-      return date.toLocaleDateString('en-US', {
-        hour: date.getHours
-        const minutes = date.getMinutes()
-        return `${hour}:${minutes}:${String(date.getMinutes(2)).padStart(2, '0')} ' '
-      }
-      return timestamp
-    }
-    return 'Unknown'
+    return date.toLocaleString()
+  } catch {
+    return timestamp
   }
 }
+
+onMounted(() => {
+  checkResume()
+})
+
+defineExpose({
+  checkResume,
+  showPrompt
+})
 </script>
 
 <style scoped>
-.resume-prompt {
+.resume-overlay {
   position: fixed;
-  top: 20%;
-  left: 50%;
-  right: 20%;
-  background: rgba(59, 130, 144, 0.7, 1);
-  transform: translateY(-50%);
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0.15,1);
-  z-index: 100;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
 }
 
-.resume-overlay .prompt-header {
+.resume-prompt {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.prompt-header {
   text-align: center;
+  margin-bottom: 20px;
 }
 
 .prompt-icon {
-  margin-right: 8px;
+  width: 48px;
+  height: 48px;
+  color: #6366f1;
+  margin-bottom: 12px;
 }
 
 .prompt-header h2 {
-  font-size: 1.2rem;
-  color: #333;
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  color: #1f2937;
 }
 
 .prompt-subtitle {
-  font-size: 0.9rem;
-  color: #666;
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
 }
 
 .progress-section {
-  margin-top: 16px;
+  margin-bottom: 20px;
 }
 
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: #e0e0e;
+  background: #e5e7eb;
   border-radius: 4px;
   overflow: hidden;
+  margin-bottom: 8px;
 }
 
 .progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #6366f1 0%, #10b981 100%);
   border-radius: 4px;
-  transition: width 0.3s;
+  transition: width 0.3s ease;
 }
+
 .progress-text {
-  font-size: 0.9rem;
-  color: #666;
-  margin-top: 8px;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin: 0;
 }
+
 .info-section {
-  background: rgba(255, 255, 255, 0.9);
+  background: #f9fafb;
   border-radius: 8px;
-  padding: 16px;
+  padding: 12px;
+  margin-bottom: 20px;
 }
+
 .info-item {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
+  padding: 6px 0;
+  font-size: 0.875rem;
 }
+
 .info-item .label {
-  font-size: 0.85rem;
-  color: #888;
-  min-width: 100px;
+  color: #6b7280;
 }
+
 .info-item .value {
-  font-size: 1rem;
-  color: #333;
+  color: #1f2937;
+  font-weight: 500;
 }
+
 .prompt-actions {
   display: flex;
   gap: 12px;
-  margin-top: 16px;
 }
+
 .btn-primary,
 .btn-secondary {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1rem;
-  font-weight: 500;
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  transition: background 0.2s;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
+
 .btn-primary {
-  background: linear-gradient(135deg, #6366f1 0%, #10b981 100%);
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
   color: white;
 }
+
 .btn-primary:hover {
-  background: linear-gradient(135deg, #10b981 0%, #059160 0%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
+
 .btn-secondary {
-  background: #f5f5f5;
-  color: #666;
+  background: #f3f4f6;
+  color: #4b5563;
 }
+
 .btn-secondary:hover {
-  background: #e0e000;
+  background: #e5e7eb;
 }
+
 .btn-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 </style>

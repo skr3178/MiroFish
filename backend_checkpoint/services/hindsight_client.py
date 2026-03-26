@@ -20,7 +20,7 @@ try:
 except ImportError:
     PSYCOPG2_AVAILABLE = False
 
-from ..config import Config
+# Config is loaded from environment variables directly
 
 
 @dataclass
